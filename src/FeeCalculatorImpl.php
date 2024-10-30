@@ -1,16 +1,18 @@
 <?php
+
 namespace PragmaGoTech\Interview;
 
 use PragmaGoTech\Interview\Model\LoanProposal;
 
-class FeeCalculatorImpl implements FeeCalculator {
-    use MathUtilities; // Use the MathUtilities trait
+class FeeCalculatorImpl implements FeeCalculator
+{
+    use MathUtilities;
 
-    public function calculate(LoanProposal $loanProposal): float {
+    public function calculate(LoanProposal $loanProposal): float
+    {
         $term = $loanProposal->getTerm();
         $amount = $loanProposal->getAmount();
 
-        // Get the fee structure from FeeStructure class
         $structure = FeeStructure::getStructure($term);
         if ($structure === null) {
             throw new \InvalidArgumentException("Invalid term.");
@@ -19,8 +21,15 @@ class FeeCalculatorImpl implements FeeCalculator {
         return $this->getFee($amount, $structure);
     }
 
-    private function getFee(float $amount, array $structure): float {
-        // Handle breakpoints
+    /**
+     * Calculate fee based on amount and fee structure.
+     *
+     * @param float $amount
+     * @param array<float|int, float> $structure
+     * @return float
+     */
+    private function getFee(float $amount, array $structure): float
+    {
         $lowerBound = null;
         $upperBound = null;
         $lowerFee = null;
@@ -36,6 +45,10 @@ class FeeCalculatorImpl implements FeeCalculator {
             $lowerFee = $fee;
         }
 
+        // Default to 0 if no lower fee is available to avoid null values
+        $lowerFee = $lowerFee ?? 0;
+        $upperFee = $upperFee ?? 0;
+
         if ($lowerBound === null) {
             return self::roundUp(0, $amount); // No fee for amounts < 1000
         } elseif ($upperBound === null) {
@@ -43,6 +56,12 @@ class FeeCalculatorImpl implements FeeCalculator {
         }
 
         // Interpolate linearly between the two breakpoints
-        return self::linearInterpolation($amount, $lowerBound, $lowerFee, $upperBound, $upperFee);
+        return self::linearInterpolation(
+            $amount,
+            (float) $lowerBound,
+            (float) $lowerFee,
+            (float) $upperBound,
+            (float) $upperFee
+        );
     }
 }

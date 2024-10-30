@@ -1,7 +1,12 @@
 <?php
+
 namespace PragmaGoTech\Interview;
 
-class FeeStructure {
+class FeeStructure
+{
+    /**
+     * @var array<int, array<int, float>>
+     */
     private static $structure = [
         12 => [
             1000 => 50, 2000 => 90, 3000 => 90, 4000 => 115,
@@ -19,7 +24,12 @@ class FeeStructure {
         ],
     ];
 
-    public static function getStructure(int $term): ?array {
+    /**
+     * @param int $term
+     * @return array<int, float>|null
+     */
+    public static function getStructure(int $term): ?array
+    {
         return self::$structure[$term] ?? null;
     }
 }
